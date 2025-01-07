@@ -1,12 +1,16 @@
-// server.js
 const express = require('express');
+const dotenv = require('dotenv');
+
+// Load environment variables
+dotenv.config();
+
 const app = express();
-const port = 3000;
+const PORT = process.env.PORT || 3000;
 
 app.get('/', (req, res) => {
-  res.send('Hello, API Sports Events!');
+    res.send('Welcome to the Sports Events API!');
 });
 
-app.listen(port, () => {
-  console.log(`Server is running at http://localhost:${port}`);
+app.listen(PORT, () => {
+    console.log(`Server running on http://localhost:${PORT}`);
 });
