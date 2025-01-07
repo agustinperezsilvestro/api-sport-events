@@ -35,13 +35,22 @@ app.get('/events/:id', (req, res) => {
 
 // PUT update event by ID
 app.put('/events/:id', (req, res) => {
+    // Find the event by ID
     let event = events.find(e => e.id === parseInt(req.params.id));
-    if (!event) return res.status(404).send('Event not found');
+
+    // If the event doesn't exist, return a 404 with an error message
+    if (!event) {
+        console.log(`Event with ID ${req.params.id} not found.`);
+        return res.status(404).send('Event not found');
+    }
     
-    // Update event data
+    // Merge the new data with the existing event data
     event = { ...event, ...req.body };
-    events = events.map(e => e.id === parseInt(req.params.id) ? event : e);
     
+    // Replace the old event with the updated one in the array
+    events = events.map(e => e.id === parseInt(req.params.id) ? event : e);
+
+    // Return the updated event
     res.json(event);
 });
 
