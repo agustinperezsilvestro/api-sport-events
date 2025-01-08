@@ -1,66 +1,93 @@
 const express = require('express');
 const dotenv = require('dotenv');
+const mongoose = require('mongoose');
+const Event = require('./models/Event');
+
 dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 4000;
 
+// Connect to MongoDB
+mongoose.connect(process.env.MONGODB_URI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+})
+.then(() => console.log('Connected to MongoDB'))
+.catch(err => console.error('MongoDB connection error:', err));
+
 app.use(express.json()); // Middleware to parse JSON bodies
 
-// Dummy data for events
-let events = [
-    { id: 1, name: 'Football Match', date: '2025-03-12', location: 'Stadium A' },
-    { id: 2, name: 'Basketball Tournament', date: '2025-03-15', location: 'Arena B' }
-];
+// Root route
+app.get('/', (req, res) => {
+    res.send('Welcome to the Sports Event API!');
+});
 
 // GET all events
-app.get('/events', (req, res) => {
-    res.json(events);
+app.get('/events', async (req, res) => {
+    try {
+        const events = await Event.find();  // Fetch events from MongoDB
+        res.json(events);
+    } catch (err) {
+        res.status(500).send('Server error');
+    }
 });
 
 // POST a new event
-app.post('/events', (req, res) => {
-    const newEvent = req.body;
-    newEvent.id = events.length + 1;  // Auto-assign an ID
-    events.push(newEvent);
-    res.status(201).json(newEvent);
+app.post('/events', async (req, res) => {
+    const { name, date, location } = req.body;
+
+    try {
+        const newEvent = new Event({
+            name,
+            date,
+            location
+        });
+
+        await newEvent.save();  // Save to MongoDB
+        res.status(201).json(newEvent);
+    } catch (err) {
+        res.status(500).send('Server error');
+    }
 });
 
 // GET event by ID
-app.get('/events/:id', (req, res) => {
-    const event = events.find(e => e.id === parseInt(req.params.id));
-    if (!event) return res.status(404).send('Event not found');
-    res.json(event);
+app.get('/events/:id', async (req, res) => {
+    try {
+        const event = await Event.findById(req.params.id);  // Find event by MongoDB ID
+        if (!event) return res.status(404).send('Event not found');
+        res.json(event);
+    } catch (err) {
+        res.status(500).send('Server error');
+    }
 });
 
 // PUT update event by ID
-app.put('/events/:id', (req, res) => {
-    // Find the event by ID
-    let event = events.find(e => e.id === parseInt(req.params.id));
+app.put('/events/:id', async (req, res) => {
+    try {
+        let event = await Event.findById(req.params.id);
 
-    // If the event doesn't exist, return a 404 with an error message
-    if (!event) {
-        console.log(`Event with ID ${req.params.id} not found.`);
-        return res.status(404).send('Event not found');
+        if (!event) return res.status(404).send('Event not found');
+
+        // Update the event
+        event = Object.assign(event, req.body);
+        await event.save();  // Save the updated event
+
+        res.json(event);
+    } catch (err) {
+        res.status(500).send('Server error');
     }
-    
-    // Merge the new data with the existing event data
-    event = { ...event, ...req.body };
-    
-    // Replace the old event with the updated one in the array
-    events = events.map(e => e.id === parseInt(req.params.id) ? event : e);
-
-    // Return the updated event
-    res.json(event);
 });
 
 // DELETE event by ID
-app.delete('/events/:id', (req, res) => {
-    const eventIndex = events.findIndex(e => e.id === parseInt(req.params.id));
-    if (eventIndex === -1) return res.status(404).send('Event not found');
-    
-    events.splice(eventIndex, 1);
-    res.status(204).send();
+app.delete('/events/:id', async (req, res) => {
+    try {
+        const event = await Event.findByIdAndDelete(req.params.id);  // Delete the event
+        if (!event) return res.status(404).send('Event not found');
+        res.status(204).send();
+    } catch (err) {
+        res.status(500).send('Server error');
+    }
 });
 
 app.listen(PORT, () => {
