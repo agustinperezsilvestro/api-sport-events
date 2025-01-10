@@ -1,20 +1,19 @@
-import chai from 'chai';
+import { expect } from 'chai';  // Destructure 'expect' directly
 import chaiHttp from 'chai-http';
-import server from '../server'; // Import your server
+import { app } from '../server.js'; // Import 'app' from server.js
 
-chai.should();
-chai.use(chaiHttp);
+chai.use(chaiHttp);  // Enable chai-http for HTTP assertions
 
 describe('Sports Event API', () => {
   // Test the GET /events route
   describe('GET /events', () => {
     it('should get all events', (done) => {
       chai
-        .request(server)
+        .request(app)  // Use 'app' here instead of 'server'
         .get('/events')
         .end((err, res) => {
-          res.should.have.status(200);
-          res.body.should.be.a('array');
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a('array');
           done();
         });
     });
@@ -30,14 +29,14 @@ describe('Sports Event API', () => {
       };
       
       chai
-        .request(server)
+        .request(app)  // Use 'app' here instead of 'server'
         .post('/events')
         .send(event)
         .end((err, res) => {
-          res.should.have.status(201);
-          res.body.should.have.property('name').eq(event.name);
-          res.body.should.have.property('date').eq(event.date);
-          res.body.should.have.property('location').eq(event.location);
+          expect(res).to.have.status(201);
+          expect(res.body).to.have.property('name').eq(event.name);
+          expect(res.body).to.have.property('date').eq(event.date);
+          expect(res.body).to.have.property('location').eq(event.location);
           done();
         });
     });
@@ -49,11 +48,11 @@ describe('Sports Event API', () => {
       const eventId = 'yourEventIdHere'; // Use a valid event ID from your DB
       
       chai
-        .request(server)
+        .request(app)  // Use 'app' here instead of 'server'
         .get(`/events/${eventId}`)
         .end((err, res) => {
-          res.should.have.status(200);
-          res.body.should.be.a('object');
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a('object');
           done();
         });
     });
@@ -70,14 +69,14 @@ describe('Sports Event API', () => {
       };
 
       chai
-        .request(server)
+        .request(app)  // Use 'app' here instead of 'server'
         .put(`/events/${eventId}`)
         .send(updatedEvent)
         .end((err, res) => {
-          res.should.have.status(200);
-          res.body.should.have.property('name').eq(updatedEvent.name);
-          res.body.should.have.property('date').eq(updatedEvent.date);
-          res.body.should.have.property('location').eq(updatedEvent.location);
+          expect(res).to.have.status(200);
+          expect(res.body).to.have.property('name').eq(updatedEvent.name);
+          expect(res.body).to.have.property('date').eq(updatedEvent.date);
+          expect(res.body).to.have.property('location').eq(updatedEvent.location);
           done();
         });
     });
@@ -89,10 +88,10 @@ describe('Sports Event API', () => {
       const eventId = 'yourEventIdHere'; // Use a valid event ID from your DB
 
       chai
-        .request(server)
+        .request(app)  // Use 'app' here instead of 'server'
         .delete(`/events/${eventId}`)
         .end((err, res) => {
-          res.should.have.status(204);
+          expect(res).to.have.status(204);
           done();
         });
     });

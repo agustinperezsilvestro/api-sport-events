@@ -1,7 +1,7 @@
-const express = require('express');
-const dotenv = require('dotenv');
-const mongoose = require('mongoose');
-const Event = require('./models/Event');
+import express from 'express';
+import dotenv from 'dotenv';
+import mongoose from 'mongoose';
+import Event from './models/Event.js';
 
 dotenv.config();
 
@@ -9,10 +9,7 @@ const app = express();
 const PORT = process.env.PORT || 4000;
 
 // Connect to MongoDB
-mongoose.connect(process.env.MONGODB_URI, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-})
+mongoose.connect(process.env.MONGODB_URI)
 .then(() => console.log('Connected to MongoDB'))
 .catch(err => console.error('MongoDB connection error:', err));
 
@@ -51,7 +48,6 @@ app.post('/events', async (req, res) => {
         res.status(500).send('Server error');
     }
 });
-
 
 // GET event by ID
 app.get('/events/:id', async (req, res) => {
@@ -95,3 +91,6 @@ app.delete('/events/:id', async (req, res) => {
 app.listen(PORT, () => {
     console.log(`Server running on http://localhost:${PORT}`);
 });
+
+// Named export
+export { app };
