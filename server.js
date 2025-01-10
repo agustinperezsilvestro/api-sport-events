@@ -47,9 +47,11 @@ app.post('/events', async (req, res) => {
         await newEvent.save();  // Save to MongoDB
         res.status(201).json(newEvent);
     } catch (err) {
+        console.error('Error creating event:', err);  // Log the error here
         res.status(500).send('Server error');
     }
 });
+
 
 // GET event by ID
 app.get('/events/:id', async (req, res) => {
